@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title >Medical Multi-Shop System</title>
+
+<style>
+body{
+    font-family: Arial;
+    background: url('d.jpg') no-repeat center center/cover;
+    padding:100px;
+    color: rgb(21, 14, 5);
+}
+
+h1{text-align:center;}
+
+.container{
+    display:flex;
+    gap:90px;
+    flex-wrap:wrap;
+}
+
+/* Panels */
+.panel{
+    background:rgb(167, 180, 185);
+    padding:15px;
+    border-radius:10px;
+    box-shadow:0 2px 10px rgba(0, 0, 10, 0.695);
+    flex:3;
+    gap: 100px;
+    min-width:300px;
+}
+
+button{
+    padding:6px 10px;
+    margin:5px;
+    background:skyblue;
+    color:rgb(105, 47, 47);
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+}
+
+.alert{
+    color:red;
+    font-size:12px;
+}
+</style>
+
+</head>
+<body>
+
+<h1 >🏪 Medical cart System</h1>
+
+<!-- Shop Selector -->
+<div class="panel">
+    <h3>Select Shop</h3>
+    <select id="shopSelect" onchange="loadShop()">
+        <option value="0">Anil.medical shop</option>
+        <option value="1">R.B.Medical shop</option>
+         <option value="2">S.B.Medical</option>
+          <option value="3">AA Medical shop</option>
+           <option value="4">Ansh Medical store</option>
+            <option value="5">Ram medical shop</option>
+             <option value="6">Rahul medical</option>
+    </select>
+</div>
+<br>
+
+<div class="container">
+
+<!-- Products -->
+<div class="panel">
+    <h3>💊 Medicines</h3>
+    <div id="products"></div>
+</div>
+
+<!-- Cart -->
+<div class="panel">
+    <h3>🧾 Orders</h3>
+    <div id="cart"></div>
+    <h4 id="total">Total: ₹0</h4>
+</div>
+
+<!-- Admin -->
+<div class="panel">
+    <h3>📱 Admin Dashboard</h3>
+    <div id="admin"></div>
+</div>
+
+</div>
+
+<script>
+
+// Multi-shop data
+let shops = [
+    [
+        {name:"Paracetamol", price:50, stock:10, expiry:"2026-12"},
+        {name:"Antibiotic", price:120, stock:3, expiry:"2027-05"},
+        {name:"Dettol", price:30, stock:40, expiry:"2027-07"},
+        {name:"Liv-52", price:70, stock:10, expiry:"2026-07"}
+    ],
+    [
+        {name:"Cough Syrup", price:90, stock:8, expiry:"2026-03"},
+        {name:"Vitamin C", price:60, stock:15, expiry:"2027-01"}
+    ],
+    [
+        {name:"headace Syrup", price:90, stock:8, expiry:"2026-03"},
+        {name:"Vitamin d", price:60, stock:15, expiry:"2027-01"}
+    ],[
+        {name:"aspirine", price:90, stock:8, expiry:"2026-03"},
+        {name:"Vitamin e", price:60, stock:15, expiry:"2027-01"}
+    ],[
+        {name:"disprine Syrup", price:90, stock:8, expiry:"2026-03"},
+        {name:"Vitamin a", price:60, stock:15, expiry:"2027-01"}
+    ],[
+        {name:"pain Syrup", price:90, stock:8, expiry:"2026-03"},
+        {name:"pe", price:60, stock:15, expiry:"2027-01"}
+    ]
+    
+];
+
+let cart = [];
+let currentShop = 0;
+let profit = 0;
+
+// Load products
+function loadShop(){
+    currentShop = document.getElementById("shopSelect").value;
+    renderProducts();
+    renderAdmin();
+}
+
+// Show medicines
+function renderProducts(){
+    let html="";
+    shops[currentShop].forEach((p,i)=>{
+        let alert = "";
+
+        // expiry check
+        if(p.expiry < "2026-01"){
+            alert = "<div class='alert'>⚠️ Expiring Soon</div>";
+        }
+
+        html += `
+        <div>
+            <b>${p.name}</b> ₹${p.price}<br>
+            Stock: ${p.stock} ${alert}
+            <br>
+            <button onclick="addToCart(${i})">Add</button>
+            <hr>
+        </div>`;
+    });
+    document.getElementById("products").innerHTML = html;
+}
+
+// Add to cart
+function addToCart(i){
+    let product = shops[currentShop][i];
+
+    if(product.stock <= 0){
+        alert("Out of stock");
+        return;
+    }
+
+    let item = cart.find(x=>x.name===product.name);
+
+    if(item){
+        item.qty++;
+    } else {
+        cart.push({...product, qty:1});
+    }
+
+    product.stock--;
+    profit += product.price;
+
+    renderCart();
+    renderProducts();
+    renderAdmin();
+}
+
+// Render cart
+function renderCart(){
+    let html="";
+    let total=0;
+
+    cart.forEach((item,i)=>{
+        total += item.price * item.qty;
+
+        html += `
+        <div>
+            ${item.name} x ${item.qty}
+            <button onclick="removeItem(${i})">❌</button>
+        </div>`;
+    });
+
+    document.getElementById("cart").innerHTML = html;
+    document.getElementById("total").innerText = "Total: ₹"+total;
+}
+
+// Remove item
+function removeItem(i){
+    cart.splice(i,1);
+    renderCart();
+}
+
+// Admin dashboard
+function renderAdmin(){
+    let html="";
+    shops[currentShop].forEach(p=>{
+        html += `
+        <div>
+            ${p.name} | Stock: ${p.stock} | Exp: ${p.expiry}
+        </div>`;
+    });
+
+    html += `<hr><b>💰 Profit: ₹${profit}</b>`;
+
+    document.getElementById("admin").innerHTML = html;
+}
+
+// Init
+loadShop();
+
+</script>
+
+</body>
+</html>
